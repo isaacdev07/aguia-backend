@@ -1,6 +1,5 @@
 package aguia.history.drakes.dtos;
 
-import java.time.LocalDate;
 
 import aguia.history.drakes.domain.Team;
 
@@ -8,7 +7,6 @@ public class TeamDTO {
     private Long id;
     private String name;
     private String city;
-    private LocalDate foundationDate;
 
     public TeamDTO() {}
 
@@ -16,7 +14,6 @@ public class TeamDTO {
         this.id = entity.getId();
         this.name = entity.getName();
         this.city = entity.getCity();
-        this.foundationDate = entity.getFoundationDate();
     }
 
     public Team toEntity() {
@@ -24,7 +21,6 @@ public class TeamDTO {
         team.setId(this.id);
         team.setName(this.name);
         team.setCity(this.city);
-        team.setFoundationDate(this.foundationDate);
         return team;
     }
 

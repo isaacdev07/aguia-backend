@@ -1,6 +1,6 @@
 package aguia.history.drakes.domain;
 
-import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +23,6 @@ public class Team {
 
     @Column(nullable = false)
     private String name;  //nome do time
-    private LocalDate foundationDate; //data de fundação
     private String city; //cidade do time
     // relação com jogadores
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,12 +53,6 @@ public class Team {
     }
     public void setName(String name) {
         this.name = name;
-    }
-    public LocalDate getFoundationDate() {
-        return foundationDate;
-    }
-    public void setFoundationDate(LocalDate foundationDate) {
-        this.foundationDate = foundationDate;
     }
     public String getCity() {
         return city;
