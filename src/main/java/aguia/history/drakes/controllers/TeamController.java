@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import aguia.history.drakes.domain.Team;
+import aguia.history.drakes.dtos.TeamDTO;
 import aguia.history.drakes.services.TeamService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +20,13 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping
-    public ResponseEntity<Team> create(@RequestBody Team team) {
-        Team newTeam = teamService.createTeam(team);
+    public ResponseEntity<TeamDTO> create(@RequestBody TeamDTO dto) {
+        // dto para entidade
+        Team inputTeam = dto.toEntity();
+        //salva o time
+        Team savedTeam = teamService.createTeam(inputTeam);
         
-        return ResponseEntity.ok(newTeam);
+        return ResponseEntity.ok(new TeamDTO(savedTeam));
     }
     
     
