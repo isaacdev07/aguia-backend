@@ -34,5 +34,12 @@ public class TeamService {
 
         return savedTeam;
     }
+
+    public void deleteTeam(Long teamId) {
+        if (!teamRepository.existsById(teamId)) {
+            throw new RuntimeException("Time com ID " + teamId + " não encontrado.");
+        }
+        teamRepository.deleteById(teamId);
+    }
     
 }
