@@ -1,5 +1,7 @@
 package aguia.history.drakes.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,6 +87,22 @@ public class MatchService {
 
         // salva a partida completa
         return matchRepository.save(match);
+    }
+
+    //listar todas as partidas
+    public List<Match> findAllMatches() {
+        return matchRepository.findAll();
+    }
+
+    //listar partida por id
+    public Match findMatchById(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Partida com ID " + id + " não encontrada."));
+    }
+
+    //listar partidas por id da equipe da temporada
+    public List<Match> findMatchesByTeam(Long teamId) {
+        return matchRepository.findBySeasonTeamId(teamId);
     }
     
 }
