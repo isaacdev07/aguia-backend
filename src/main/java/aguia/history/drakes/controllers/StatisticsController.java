@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import aguia.history.drakes.dtos.PlayerAssistDTO;
 import aguia.history.drakes.dtos.PlayerStatsDTO;
 import aguia.history.drakes.dtos.TeamStatsDTO;
 import aguia.history.drakes.services.StatisticsService;
@@ -23,6 +24,12 @@ public class StatisticsController {
     @GetMapping("/top-scorers/{teamId}")
     public ResponseEntity<List<PlayerStatsDTO>> getTopScorers(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTopScorers(teamId));
+    }
+
+    // obter os principais assistentes de uma equipe
+    @GetMapping("/top-assisters/{teamId}")
+    public ResponseEntity<List<PlayerAssistDTO>> getTopAssisters(@PathVariable Long teamId) {
+        return ResponseEntity.ok(statisticsService.getTopAssisters(teamId));
     }
 
     // obter estatísticas gerais da equipe
