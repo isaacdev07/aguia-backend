@@ -13,10 +13,15 @@ public class MatchCreateDTO {
     private LocalDateTime date; // data e hora da partida
     private String location; // local da partida
     private MatchType type; // tipo da partida
+    private Long coachId; // id do técnico
 
      // placar da partida
     private Integer goalsFor;
     private Integer goalsAgainst;
+
+    //placar nos penaltis se tiver
+    private Integer penaltiesFor;
+    private Integer penaltiesAgainst;
 
     // As listas aninhadas
     private List<LineupDTO> lineup;
@@ -26,16 +31,19 @@ public class MatchCreateDTO {
     public MatchCreateDTO() {}
 
     public MatchCreateDTO(Long seasonId, String opponentName, LocalDateTime date, String location, MatchType type,
-            Integer goalsFor, Integer goalsAgainst, List<LineupDTO> lineup, List<MatchEventDTO> events) {
+            Integer goalsFor, Integer goalsAgainst, Integer penaltiesFor, Integer penaltiesAgainst, List<LineupDTO> lineup, List<MatchEventDTO> events, Long coachId) {
         this.seasonId = seasonId;
         this.opponentName = opponentName;
         this.date = date;
         this.location = location;
         this.type = type;
+        this.penaltiesFor = penaltiesFor;
+        this.penaltiesAgainst = penaltiesAgainst;
         this.goalsFor = goalsFor;
         this.goalsAgainst = goalsAgainst;
         this.lineup = lineup;
         this.events = events;
+        this.coachId = coachId;
     }
 
     public Long getSeasonId() {
@@ -49,6 +57,12 @@ public class MatchCreateDTO {
     }
     public void setOpponentName(String opponentName) {
         this.opponentName = opponentName;
+    }
+    public Long getCoachId() {
+        return coachId;
+    }
+    public void setCoachId(Long coachId) {
+        this.coachId = coachId;
     }
     public LocalDateTime getDate() {
         return date;
@@ -79,6 +93,18 @@ public class MatchCreateDTO {
     }
     public void setGoalsAgainst(Integer goalsAgainst) {
         this.goalsAgainst = goalsAgainst;
+    }
+    public Integer getPenaltiesFor() {
+        return penaltiesFor;
+    }
+    public void setPenaltiesFor(Integer penaltiesFor) {
+        this.penaltiesFor = penaltiesFor;
+    }
+    public Integer getPenaltiesAgainst() {
+        return penaltiesAgainst;
+    }
+    public void setPenaltiesAgainst(Integer penaltiesAgainst) {
+        this.penaltiesAgainst = penaltiesAgainst;
     }
     public List<LineupDTO> getLineup() {
         return lineup;
