@@ -45,6 +45,19 @@ public class StatisticsService {
             } else if (match.getGoalsFor() < match.getGoalsAgainst()) {
                 stats.setLosses(stats.getLosses() + 1);
             } else {
+                //se houve empate, verifica penaltis
+                if(match.getPenaltiesFor() != null && match.getPenaltiesAgainst() != null) {
+                    // se fez mais penaltis que o adversário, venceu
+                    if(match.getPenaltiesFor() > match.getPenaltiesAgainst()) {
+                        // adiciona vitória nos penaltis, e empate no tempo normal
+                        stats.setPenaltyWins(stats.getPenaltyWins() + 1);
+                        // se sofreu mais penaltis que o adversário, perdeu
+                    } else if(match.getPenaltiesFor() < match.getPenaltiesAgainst()) {
+                        // adiciona derrota nos penaltis, e empate no tempo normal
+                        stats.setPenaltyLosses(stats.getPenaltyLosses() + 1);
+                    }
+                }
+                //empate sem penaltis
                 stats.setDraws(stats.getDraws() + 1);
             }
         }
