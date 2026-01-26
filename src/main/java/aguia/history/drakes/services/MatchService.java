@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import aguia.history.drakes.domain.Coach;
 import aguia.history.drakes.domain.Match;
 import aguia.history.drakes.domain.MatchEvent;
 import aguia.history.drakes.domain.MatchLineup;
@@ -13,6 +14,7 @@ import aguia.history.drakes.domain.Season;
 import aguia.history.drakes.dtos.LineupDTO;
 import aguia.history.drakes.dtos.MatchCreateDTO;
 import aguia.history.drakes.dtos.MatchEventDTO;
+import aguia.history.drakes.repositories.CoachRepository;
 import aguia.history.drakes.repositories.MatchRepository;
 import aguia.history.drakes.repositories.PlayerRepository;
 import aguia.history.drakes.repositories.SeasonRepository;
@@ -28,6 +30,9 @@ public class MatchService {
 
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private CoachRepository coachRepository;    
 
     // criar partida completa com elenco e eventos
     @Transactional
@@ -45,6 +50,20 @@ public class MatchService {
         match.setMatchType(dto.getType());
         match.setGoalsFor(dto.getGoalsFor());
         match.setGoalsAgainst(dto.getGoalsAgainst());
+        match.setPenaltiesFor(dto.getPenaltiesFor());
+        match.setPenaltiesAgainst(dto.getPenaltiesAgainst()); 
+        
+        // se tiver tecnico, busca o tecnico e associa
+        if (dto.getCoachId() != null) {
+            // se o ID do técnico foi informado no JSON, busca o técnico pelo ID
+            Coach coach = coachRepository.findById(dto.getCoachId())
+                    .orElseThrow(() -> new RuntimeException("Técnico com ID " + dto.getCoachId() + " não encontrado."));
+            match.setCoach(coach);
+        } 
+        else if (season.getTeam().getCurrentCoach() != null) {
+            // se o ID do técnico não foi informado, associa o técnico atual do time da temporada
+            match.setCoach(season.getTeam().getCurrentCoach());
+        }
 
         // processa o elenco (Lineup)
    if (dto.getLineup() != null) {
