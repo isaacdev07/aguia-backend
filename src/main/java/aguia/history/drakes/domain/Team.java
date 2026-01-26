@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -30,6 +32,11 @@ public class Team {
     // relação com temporadas
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Season> seasons = new ArrayList<>();
+
+    //relacionamento com técnicos
+    @ManyToOne 
+    @JoinColumn(name = "current_coach_id", nullable = true) 
+    private Coach currentCoach;
 
     // construtor padrão
     public Team() {}
@@ -60,4 +67,11 @@ public class Team {
     public void setCity(String city) {
         this.city = city;
     }
+    public Coach getCurrentCoach() {
+        return currentCoach;
+    }
+    public void setCurrentCoach(Coach currentCoach) {
+        this.currentCoach = currentCoach;
+    }
+    
 }
