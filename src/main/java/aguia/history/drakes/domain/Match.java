@@ -42,6 +42,10 @@ public class Match {
     private Integer goalsFor = 0;     // Gols a favor
     private Integer goalsAgainst = 0; // Gols contra
 
+    //placar nos penaltis se tiver
+    private Integer penaltiesFor = 0;     // Gols a favor nos penaltis
+    private Integer penaltiesAgainst = 0; // Gols contra nos penaltis
+
     // relação com escalação e eventos
     
     // Lista de jogadores escalados (Cascade ALL = Salvar a partida salva a escalação junto)
@@ -52,16 +56,23 @@ public class Match {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchEvent> events = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "coach_id", nullable = true) // Pode não ter técnico no jogo
+    private Coach coach;
+
 
     public Match() {}
 
     public Match(Season season, String opponentName, LocalDateTime matchDate, String location,
-            MatchType matchType) {
+            MatchType matchType, Integer penaltiesFor, Integer penaltiesAgainst, Coach coach) {
         this.season = season;
         this.opponentName = opponentName;
         this.matchDate = matchDate;
         this.location = location;
         this.matchType = matchType;
+        this.coach = coach;
+        this.penaltiesFor = penaltiesFor;
+        this.penaltiesAgainst = penaltiesAgainst;
     }
 
     public Long getId() {
@@ -88,6 +99,18 @@ public class Match {
     public void setGoalsAgainst(Integer goalsAgainst) {
         this.goalsAgainst = goalsAgainst;
     }
+    public Integer getPenaltiesFor() {
+        return penaltiesFor;
+    }
+    public void setPenaltiesFor(Integer penaltiesFor) {
+        this.penaltiesFor = penaltiesFor;
+    }
+    public Integer getPenaltiesAgainst() {
+        return penaltiesAgainst;
+    }
+    public void setPenaltiesAgainst(Integer penaltiesAgainst) {
+        this.penaltiesAgainst = penaltiesAgainst;
+    }   
     public List<MatchLineup> getLineup() {
         return lineup;
     }
@@ -124,5 +147,10 @@ public class Match {
     public void setSeason(Season season) {
         this.season = season;
     }
-
+    public Coach getCoach() {
+        return coach;
+    }   
+    public void setCoach(Coach coach) {
+        this.coach = coach;
+    }
 }
