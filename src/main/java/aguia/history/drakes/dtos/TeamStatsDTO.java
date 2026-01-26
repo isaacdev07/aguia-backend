@@ -7,8 +7,10 @@ public class TeamStatsDTO {
     
     private int totalMatches;
     private int wins;
+    private int penaltyWins;
     private int draws;
     private int losses;
+    private int penaltyLosses;
     private int goalsScored;
     private int goalsConceded;
     private int goalBalance; 
