@@ -1,5 +1,7 @@
 package aguia.history.drakes.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import aguia.history.drakes.domain.enums.Position;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +33,7 @@ public class Player {
     private Boolean isActive = true; // jogador ativo ou não
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
+    @JsonIgnore // para evitar recursão infinita na serialização
     private Team team;
 
     // getters e setters
