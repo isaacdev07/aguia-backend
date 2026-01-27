@@ -4,6 +4,8 @@ package aguia.history.drakes.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +16,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "tb_teams")
 public class Team {
@@ -28,9 +32,11 @@ public class Team {
     private String city; //cidade do time
     // relação com jogadores
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Player> players = new ArrayList<>();
     // relação com temporadas
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Season> seasons = new ArrayList<>();
 
     //relacionamento com técnicos
@@ -38,40 +44,8 @@ public class Team {
     @JoinColumn(name = "current_coach_id", nullable = true) 
     private Coach currentCoach;
 
-    // construtor padrão
-    public Team() {}
-    
-    // construtor com parâmetros
-    public Team(String name, String city) {
-        this.name = name;
-        this.city = city;
-    }
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
-    // getters e setters
-    public Long getId() {
-        return id;
-    }   
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getCity() {
-        return city;
-    }
-    public void setCity(String city) {
-        this.city = city;
-    }
-    public Coach getCurrentCoach() {
-        return currentCoach;
-    }
-    public void setCurrentCoach(Coach currentCoach) {
-        this.currentCoach = currentCoach;
-    }
-    
 }
