@@ -1,6 +1,8 @@
 package aguia.history.drakes.services;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,14 +34,20 @@ public class MatchService {
     private PlayerRepository playerRepository;
 
     @Autowired
-    private CoachRepository coachRepository;    
+    private CoachRepository coachRepository;
 
     // criar partida completa com elenco e eventos
     @Transactional
     public Match createMatch(MatchCreateDTO dto) {
-    
+
         Season season = seasonRepository.findById(dto.getSeasonId())
                 .orElseThrow(() -> new RuntimeException("Temporada com ID " + dto.getSeasonId() + " não encontrada."));
+
+        // verifica se a temporada está associada a um time
+        if (season.getTeam() == null) {
+            throw new RuntimeException("Esta temporada não está associada a nenhum time.");
+        }
+        Long seasonTeamId = season.getTeam().getId();
 
         // cria a partida (Match)
         Match match = new Match();
@@ -51,77 +59,93 @@ public class MatchService {
         match.setGoalsFor(dto.getGoalsFor());
         match.setGoalsAgainst(dto.getGoalsAgainst());
         match.setPenaltiesFor(dto.getPenaltiesFor());
-        match.setPenaltiesAgainst(dto.getPenaltiesAgainst()); 
-        
+        match.setPenaltiesAgainst(dto.getPenaltiesAgainst());
+
         // se tiver tecnico, busca o tecnico e associa
         if (dto.getCoachId() != null) {
             // se o ID do técnico foi informado no JSON, busca o técnico pelo ID
             Coach coach = coachRepository.findById(dto.getCoachId())
                     .orElseThrow(() -> new RuntimeException("Técnico com ID " + dto.getCoachId() + " não encontrado."));
             match.setCoach(coach);
-        } 
-        else if (season.getTeam().getCurrentCoach() != null) {
-            // se o ID do técnico não foi informado, associa o técnico atual do time da temporada
+        } else if (season.getTeam().getCurrentCoach() != null) {
+            // se o ID do técnico não foi informado, associa o técnico atual do time da
+            // temporada
             match.setCoach(season.getTeam().getCurrentCoach());
         }
 
+        Set<Long> playersInMatchIds = new HashSet<>();
+
         // processa o elenco (Lineup)
-   if (dto.getLineup() != null) {
+        if (dto.getLineup() != null) {
             for (LineupDTO item : dto.getLineup()) {
                 Player player = playerRepository.findById(item.getPlayerId())
                         .orElseThrow(() -> new RuntimeException("Jogador não encontrado ID: " + item.getPlayerId()));
 
-                // cria o MatchLineup
+                // o jogador pertence ao time da temporada? se não, erro de integridade
+                if (!player.getTeam().getId().equals(seasonTeamId)) {
+                    throw new RuntimeException("Erro de Integridade: O jogador " + player.getName() +
+                            " pertence ao time " + player.getTeam().getName() +
+                            ", mas esta partida é do time " + season.getTeam().getName());
+                }
+
                 MatchLineup lineupEntity = new MatchLineup();
-                lineupEntity.setMatch(match); // associa a partida
+                lineupEntity.setMatch(match);
                 lineupEntity.setPlayer(player);
                 lineupEntity.setStatus(item.getStatus());
 
-                // adiciona na lista da partida
                 match.getLineup().add(lineupEntity);
+
+                // Adiciona o ID na lista de "jogadores em campo/banco"
+                playersInMatchIds.add(player.getId());
             }
         }
 
         // administra os eventos (Events)
         if (dto.getEvents() != null) {
             for (MatchEventDTO item : dto.getEvents()) {
-                
+
                 Player player = null;
-                // se o evento tiver jogador associado busca o jogador
-                // se nao tiver, deixa nulo (ex: gol contra)
+
                 if (item.getPlayerId() != null) {
+                    // o jogador do evento deve estar no elenco da partida, caso contrário, erro de
+                    // integridade
+                    if (!playersInMatchIds.contains(item.getPlayerId())) {
+                        throw new RuntimeException("Erro de Integridade: O jogador ID " + item.getPlayerId() +
+                                " tentou registrar um evento (" + item.getType()
+                                + "), mas não foi escalado na partida (Lineup).");
+                    }
+
                     player = playerRepository.findById(item.getPlayerId())
-                            .orElseThrow(() -> new RuntimeException("Jogador do evento não encontrado ID: " + item.getPlayerId()));
+                            .orElseThrow(() -> new RuntimeException(
+                                    "Jogador do evento não encontrado ID: " + item.getPlayerId()));
                 }
-                // cria o MatchEvent
+
                 MatchEvent eventEntity = new MatchEvent();
                 eventEntity.setMatch(match);
-                eventEntity.setPlayer(player);
+                eventEntity.setPlayer(player); // pode ser nulo para eventos sem jogador associado
                 eventEntity.setEventType(item.getType());
 
-                // adiciona os eventos na lista da partida
                 match.getEvents().add(eventEntity);
             }
         }
-
         // salva a partida completa
         return matchRepository.save(match);
     }
 
-    //listar todas as partidas
+    // listar todas as partidas
     public List<Match> findAllMatches() {
         return matchRepository.findAll();
     }
 
-    //listar partida por id
+    // listar partida por id
     public Match findMatchById(Long id) {
         return matchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Partida com ID " + id + " não encontrada."));
     }
 
-    //listar partidas por id da equipe da temporada
+    // listar partidas por id da equipe da temporada
     public List<Match> findMatchesByTeam(Long teamId) {
         return matchRepository.findBySeasonTeamId(teamId);
     }
-    
+
 }
