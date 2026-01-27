@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -40,6 +42,7 @@ public class User implements UserDetails {
     // metodos userdetails
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // se for admin, retorna ambas as roles, senao retorna apenas user
         if(this.role.equals("ADMIN")) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
@@ -52,26 +55,31 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public String getPassword() {
         return password; 
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true; 
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true; 
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true; 
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true; 
     }
