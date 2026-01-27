@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import aguia.history.drakes.domain.Coach;
@@ -13,6 +14,8 @@ import aguia.history.drakes.domain.MatchEvent;
 import aguia.history.drakes.domain.MatchLineup;
 import aguia.history.drakes.domain.Player;
 import aguia.history.drakes.domain.Season;
+import aguia.history.drakes.domain.Team;
+import aguia.history.drakes.domain.User;
 import aguia.history.drakes.dtos.LineupDTO;
 import aguia.history.drakes.dtos.MatchCreateDTO;
 import aguia.history.drakes.dtos.MatchEventDTO;
@@ -47,6 +50,11 @@ public class MatchService {
         if (season.getTeam() == null) {
             throw new RuntimeException("Esta temporada não está associada a nenhum time.");
         }
+
+        // valida se quem esta criando a partida é o dono do time
+        validarDono(season.getTeam());
+
+        // pega o id do time da temporada para validações futuras  
         Long seasonTeamId = season.getTeam().getId();
 
         // cria a partida (Match)
@@ -146,6 +154,26 @@ public class MatchService {
     // listar partidas por id da equipe da temporada
     public List<Match> findMatchesByTeam(Long teamId) {
         return matchRepository.findBySeasonTeamId(teamId);
+    }
+
+    // metodo auxiliar para validar dono do time
+    private void validarDono(Team team) {
+        String emailLogado = getEmailLogado();
+        
+        // Verifica se o time tem dono e se o email bate
+        if (team.getOwner() == null || !team.getOwner().getEmail().equals(emailLogado)) {
+            throw new RuntimeException("ACESSO NEGADO: Você não é o dono deste time.");
+        }
+    }
+
+    // metodo auxiliar para pegar email do usuário logado
+    private String getEmailLogado() {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return ((User) principal).getUsername();
+        } else {
+            return principal.toString();
+        }
     }
 
 }
