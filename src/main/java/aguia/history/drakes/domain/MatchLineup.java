@@ -11,7 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "tb_match_lineups")
 public class MatchLineup {
@@ -33,36 +35,4 @@ public class MatchLineup {
     @Enumerated(EnumType.STRING)
     private LineupStatus status;
 
-    public MatchLineup() {}
-
-    public MatchLineup(Match match, Player player, LineupStatus status) {
-        this.match = match;
-        this.player = player;
-        this.status = status;
-    }
-
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Match getMatch() {
-        return match;
-    }
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-    public Player getPlayer() {
-        return player;
-    }
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-    public LineupStatus getStatus() {
-        return status;
-    }
-    public void setStatus(LineupStatus status) {
-        this.status = status;
-    }
 }
