@@ -11,7 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "tb_match_events")
 public class MatchEvent {
@@ -33,37 +35,4 @@ public class MatchEvent {
     private EventType eventType;
 
 
-    public MatchEvent() {}
-
-    public MatchEvent(Match match, Player player, EventType eventType) {
-        this.match = match;
-        this.player = player;
-        this.eventType = eventType;
-    }
-
-
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public EventType getEventType() {
-        return eventType;
-    }
-    public void setEventType(EventType eventType) {
-        this.eventType = eventType;
-    }
-    public Match getMatch() {
-        return match;
-    }
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-    public Player getPlayer() {
-        return player;
-    }
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
 }
