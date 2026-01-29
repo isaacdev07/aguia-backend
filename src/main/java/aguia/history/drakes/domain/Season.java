@@ -7,7 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "tb_seasons")
 public class Season {
@@ -26,29 +28,4 @@ public class Season {
     @JoinColumn(name = "team_id", nullable = false) 
     private Team team;
     
-
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Integer getYear() {
-        return year;
-    }
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public Team getTeam() {
-        return team;
-    }
-    public void setTeam(Team team) {
-        this.team = team;
-    }
 }
