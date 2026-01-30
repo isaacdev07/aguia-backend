@@ -3,10 +3,14 @@ package aguia.history.drakes.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import aguia.history.drakes.domain.Player;
 import aguia.history.drakes.domain.Team;
+import aguia.history.drakes.domain.User;
+import aguia.history.drakes.domain.enums.Position;
+import aguia.history.drakes.dtos.PlayerCreateDTO;
 import aguia.history.drakes.repositories.PlayerRepository;
 import aguia.history.drakes.repositories.TeamRepository;
 
@@ -19,11 +23,30 @@ public class PlayerService {
     @Autowired
     private TeamRepository teamRepository;
     //adicionar jogador a um time
-    public Player addPlayerToTeam(Long teamId, Player player) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Time nao encontrado com id: " + teamId));
+    public Player createPlayer(PlayerCreateDTO dto) {
+        // busca o time 
+        Team team = teamRepository.findById(dto.teamId())
+                .orElseThrow(() -> new RuntimeException("Time não encontrado com ID: " + dto.teamId()));
 
-        player.setTeam(team);
+        // usa o método auxiliar para validar dono do time
+        validarDono(team);
+
+        // cria o jogador
+        Player player = new Player();
+        player.setName(dto.name());
+        // player.setPosition(dto.position());
+        player.setShirtNumber(dto.shirtNumber());
+        player.setTeam(team); 
+        player.setIsActive(true); 
+
+        // facilitanco para o front poder enviar a posição como string
+        try {
+            // garante que a posição é válida
+            player.setPosition(Position.valueOf(dto.position().toUpperCase())); 
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Posição inválida: " + dto.position());
+        }
+
         return playerRepository.save(player);
     }
 
@@ -31,6 +54,27 @@ public class PlayerService {
     public List<Player> lisPlayersByTeam(Long teamId){
 
         return playerRepository.findByTeamId(teamId);
+    }
+
+
+    // metodo auxiliar para validar dono do time
+    private void validarDono(Team team) {
+        String emailLogado = getEmailLogado();
+        
+        // Verifica se o time tem dono e se o email bate
+        if (team.getOwner() == null || !team.getOwner().getEmail().equals(emailLogado)) {
+            throw new RuntimeException("ACESSO NEGADO: Você não é o dono deste time.");
+        }
+    }
+
+    // metodo auxiliar para pegar email do usuário logado
+    private String getEmailLogado() {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return ((User) principal).getUsername();
+        } else {
+            return principal.toString();
+        }
     }
 
 }
