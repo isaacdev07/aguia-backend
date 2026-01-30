@@ -11,4 +11,7 @@ import java.util.List;
 public interface PlayerRepository extends JpaRepository<Player, Long> {
     // metodo para encontrar jogadores por time
     List<Player> findByTeamId(Long teamId);
+
+    // metodo para encontrar jogadores ativos por time
+    List<Player> findByTeamIdAndIsActiveTrue(Long teamId);
 }
