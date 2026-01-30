@@ -11,6 +11,7 @@ import aguia.history.drakes.domain.Team;
 import aguia.history.drakes.domain.User;
 import aguia.history.drakes.domain.enums.Position;
 import aguia.history.drakes.dtos.PlayerCreateDTO;
+import aguia.history.drakes.dtos.PlayerUpdateDTO;
 import aguia.history.drakes.repositories.PlayerRepository;
 import aguia.history.drakes.repositories.TeamRepository;
 
@@ -48,6 +49,48 @@ public class PlayerService {
         }
 
         return playerRepository.save(player);
+    }
+
+    // metodo para atualizar jogador
+    public Player updatePlayer(Long playerId, PlayerUpdateDTO dto) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Jogador não encontrado."));
+        // valida se o usuário logado é o dono do time do jogador
+        validarDono(player.getTeam());
+
+        // atualiza os dados do jogador
+        player.setName(dto.name());
+        player.setShirtNumber(dto.shirtNumber());
+        
+        // try catch para validar a posição
+        try {
+            player.setPosition(Position.valueOf(dto.position().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Posição inválida: " + dto.position());
+        }
+
+        return playerRepository.save(player);
+    }
+
+    // metodo para deletar jogador (soft delete)
+    public void deletePlayer(Long playerId) {
+        // procura o jogador
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Jogador não encontrado."));
+
+        // valida se o usuário logado é o dono do time do jogador
+        validarDono(player.getTeam());
+
+        // apenas muda o status para inativo
+        player.setIsActive(false); 
+        
+        // salva a mudança
+        playerRepository.save(player);
+    }
+
+    // lista somente os jogadores ativos de certo time
+    public List<Player> findActivePlayersByTeam(Long teamId) {
+        return playerRepository.findByTeamIdAndIsActiveTrue(teamId);
     }
 
     //listar jogadores por time
