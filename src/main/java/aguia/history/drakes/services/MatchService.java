@@ -18,6 +18,7 @@ import aguia.history.drakes.domain.Team;
 import aguia.history.drakes.domain.User;
 import aguia.history.drakes.dtos.LineupDTO;
 import aguia.history.drakes.dtos.MatchCreateDTO;
+import aguia.history.drakes.dtos.MatchUpdateDTO;
 import aguia.history.drakes.dtos.MatchEventDTO;
 import aguia.history.drakes.repositories.CoachRepository;
 import aguia.history.drakes.repositories.MatchRepository;
@@ -139,21 +140,58 @@ public class MatchService {
         // salva a partida completa
         return matchRepository.save(match);
     }
+    // atualizar dados básicos da partida
+    public Match updateMatch(Long matchId, MatchUpdateDTO dto) {
+        // busca a partida
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada com ID: " + matchId));
+
+        // verifica se é o dono do time
+        validarDono(match.getSeason().getTeam());
+
+        // atualiza os dados basicos
+        match.setMatchDate(dto.date());
+        match.setOpponentName(dto.opponent());
+        match.setLocation(dto.location());
+
+        // atualiza os placares se vierem no dto
+        if (dto.goalsFor() != null) match.setGoalsFor(dto.goalsFor());
+        if (dto.goalsAgainst() != null) match.setGoalsAgainst(dto.goalsAgainst());
+
+        // salva e retorna a partida atualizada
+        return matchRepository.save(match);
+    }
+
+    // apagar partida (soft delete)
+    public void deleteMatch(Long matchId) {
+        // busca a partida
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada com ID: " + matchId));
+
+        // verifica se é o dono do time
+        validarDono(match.getSeason().getTeam());
+
+        // deixa a partida inativa (soft delete)
+        match.setIsActive(false); 
+
+        // salva a alteração
+        matchRepository.save(match);
+    }
 
     // listar todas as partidas
     public List<Match> findAllMatches() {
-        return matchRepository.findAll();
+        return matchRepository.findByIsActiveTrue();
     }
 
     // listar partida por id
     public Match findMatchById(Long id) {
-        return matchRepository.findById(id)
+        return matchRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new RuntimeException("Partida com ID " + id + " não encontrada."));
     }
 
     // listar partidas por id da equipe da temporada
     public List<Match> findMatchesByTeam(Long teamId) {
-        return matchRepository.findBySeasonTeamId(teamId);
+        return matchRepository.findBySeasonTeamIdAndIsActiveTrue(teamId);
     }
 
     // metodo auxiliar para validar dono do time
