@@ -33,6 +33,7 @@ public class Match {
     @JoinColumn(name = "season_id", nullable = false)
     private Season season;
 
+    private Boolean isActive = true; // partida ativa por padrão
     private String opponentName;     // adversário
     private LocalDateTime matchDate; // data e hora
     private String location;         // local do jogo
