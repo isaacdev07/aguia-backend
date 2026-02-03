@@ -74,4 +74,10 @@ public class MatchController {
         Match updatedMatch = matchService.addEventToMatch(id, dto);
         return ResponseEntity.ok(updatedMatch);
     }
+        // apagar evento da partida
+    @DeleteMapping("/{matchId}/events/{eventId}")
+    public ResponseEntity<Match> removeEvent(@PathVariable Long matchId, @PathVariable Long eventId) {
+        Match updatedMatch = matchService.removeEventFromMatch(matchId, eventId);
+        return ResponseEntity.ok(updatedMatch);
+    }
 }
