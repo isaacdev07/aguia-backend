@@ -178,6 +178,43 @@ public class MatchService {
         matchRepository.save(match);
     }
 
+    // adicionar novo evento na partida
+    public Match addEventToMatch(Long matchId, MatchEventDTO dto) {
+        // usa somente partida ativa
+        Match match = matchRepository.findByIdAndIsActiveTrue(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada."));
+
+        // valida o dono do time
+        validarDono(match.getSeason().getTeam());
+
+        // se tiver jogador envolvido, busca o jogador
+        Player player = null;
+        if (dto.getPlayerId() != null) {
+            player = playerRepository.findById(dto.getPlayerId())
+                    .orElseThrow(() -> new RuntimeException("Jogador não encontrado."));
+            
+            // verificação simples, o jogador pertence ao time da partida?
+            if (!player.getTeam().getId().equals(match.getSeason().getTeam().getId())) {
+                 throw new RuntimeException("Este jogador não pertence ao time desta partida.");
+            }
+        }
+
+        // cria o novo evento
+        MatchEvent event = new MatchEvent();
+        event.setMatch(match);
+        event.setPlayer(player);
+        event.setEventType(dto.getType()); // Assumindo que seu DTO já converte ou é Enum
+
+        // atualiza o placar se for gol automaticamente
+        if ("GOL".equalsIgnoreCase(dto.getType().toString())) {
+            match.setGoalsFor(match.getGoalsFor() + 1);
+        }
+
+        // Adiciona na lista e Salva
+        match.getEvents().add(event);
+        return matchRepository.save(match);
+    }
+
     // listar todas as partidas
     public List<Match> findAllMatches() {
         return matchRepository.findByIsActiveTrue();
