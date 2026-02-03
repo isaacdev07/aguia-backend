@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import aguia.history.drakes.domain.Match;
 import aguia.history.drakes.dtos.MatchCreateDTO;
+import aguia.history.drakes.dtos.MatchEventDTO;
 import aguia.history.drakes.dtos.MatchUpdateDTO;
 import aguia.history.drakes.services.MatchService;
 import jakarta.validation.Valid;
@@ -65,5 +66,12 @@ public class MatchController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         matchService.deleteMatch(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // adicionar evento à partida
+    @PostMapping("/{id}/events")
+    public ResponseEntity<Match> addEvent(@PathVariable Long id, @RequestBody @Valid MatchEventDTO dto) {
+        Match updatedMatch = matchService.addEventToMatch(id, dto);
+        return ResponseEntity.ok(updatedMatch);
     }
 }
