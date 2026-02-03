@@ -214,6 +214,29 @@ public class MatchService {
         match.getEvents().add(event);
         return matchRepository.save(match);
     }
+    
+      // apagar evento da partida
+    public Match removeEventFromMatch(Long matchId, Long eventId) {
+        // usa somente partida ativa
+        Match match = matchRepository.findByIdAndIsActiveTrue(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada."));
+        
+        // valida o dono do time
+        validarDono(match.getSeason().getTeam());
+
+        // remove o evento da lista e ajusta o placar se for gol
+        match.getEvents().removeIf(event -> {
+            if (event.getId().equals(eventId)) {
+                if ("GOL".equalsIgnoreCase(event.getEventType().toString())) {
+                     match.setGoalsFor(match.getGoalsFor() - 1);
+                }
+                return true; // remove da lista
+            }
+            return false;
+        });
+
+        return matchRepository.save(match);
+    }
 
     // listar todas as partidas
     public List<Match> findAllMatches() {
