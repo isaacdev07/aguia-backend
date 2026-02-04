@@ -45,6 +45,10 @@ public class Match {
     private Integer goalsFor = 0;     // Gols a favor
     private Integer goalsAgainst = 0; // Gols contra
 
+    // cartões
+    private Integer yellowCards = 0;  // cartões amarelos
+    private Integer redCards = 0;     // cartões vermelhos
+
     //placar nos penaltis se tiver
     private Integer penaltiesFor = 0;     // Gols a favor nos penaltis
     private Integer penaltiesAgainst = 0; // Gols contra nos penaltis
