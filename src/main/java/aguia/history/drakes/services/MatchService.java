@@ -165,7 +165,7 @@ public class MatchService {
         // salva a partida completa
         return matchRepository.save(match);
     }
-    
+
     // atualizar dados básicos da partida
     public Match updateMatch(Long matchId, MatchUpdateDTO dto) {
         // busca a partida
@@ -229,19 +229,27 @@ public class MatchService {
         MatchEvent event = new MatchEvent();
         event.setMatch(match);
         event.setPlayer(player);
-        event.setEventType(dto.getType()); // Assumindo que seu DTO já converte ou é Enum
+        event.setEventType(dto.getType()); 
 
-        // atualiza o placar se for gol automaticamente
-        if ("GOL".equalsIgnoreCase(dto.getType().toString())) {
+        // placar e cartão automático conforme o tipo de evento
+        String type = dto.getType().toString().toUpperCase();
+
+        if ("GOL".equals(type)) {
             match.setGoalsFor(match.getGoalsFor() + 1);
+        } 
+        else if ("YELLOW_CARD".equals(type)) {
+            match.setYellowCards(match.getYellowCards() + 1);
+        } 
+        else if ("RED_CARD".equals(type)) {
+            match.setRedCards(match.getRedCards() + 1);
         }
 
-        // Adiciona na lista e Salva
+        // adiciona na lista e Salva
         match.getEvents().add(event);
         return matchRepository.save(match);
     }
     
-      // apagar evento da partida
+    // apagar evento da partida
     public Match removeEventFromMatch(Long matchId, Long eventId) {
         // usa somente partida ativa
         Match match = matchRepository.findByIdAndIsActiveTrue(matchId)
@@ -250,16 +258,32 @@ public class MatchService {
         // valida o dono do time
         validarDono(match.getSeason().getTeam());
 
-        // remove o evento da lista e ajusta o placar se for gol
-        match.getEvents().removeIf(event -> {
+        // remove o evento da lista e ajusta os contadores
+        boolean removed = match.getEvents().removeIf(event -> {
             if (event.getId().equals(eventId)) {
-                if ("GOL".equalsIgnoreCase(event.getEventType().toString())) {
-                     match.setGoalsFor(match.getGoalsFor() - 1);
+                
+                String type = event.getEventType().toString().toUpperCase();
+
+                // logica inversa para decrementar os contadores
+                if ("GOL".equals(type)) {
+                     if (match.getGoalsFor() > 0) match.setGoalsFor(match.getGoalsFor() - 1);
                 }
-                return true; // remove da lista
+                else if ("YELLOW_CARD".equals(type)) {
+                     if (match.getYellowCards() > 0) match.setYellowCards(match.getYellowCards() - 1);
+                }
+                else if ("RED_CARD".equals(type)) {
+                     if (match.getRedCards() > 0) match.setRedCards(match.getRedCards() - 1);
+                }
+
+                return true; // confirma remoção da lista
             }
             return false;
         });
+
+        // caso tenta remover um evento que não existe retorna erro
+        if (!removed) {
+            throw new RuntimeException("Evento ID " + eventId + " não encontrado nesta partida.");
+        }
 
         return matchRepository.save(match);
     }
