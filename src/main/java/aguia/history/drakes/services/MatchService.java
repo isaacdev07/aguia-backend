@@ -40,7 +40,7 @@ public class MatchService {
     @Autowired
     private CoachRepository coachRepository;
 
-    // criar partida completa com elenco e eventos
+    // criar partida completa com elenco e eventos (gols e cartões)
     @Transactional
     public Match createMatch(MatchCreateDTO dto) {
 
@@ -65,20 +65,23 @@ public class MatchService {
         match.setMatchDate(dto.getDate());
         match.setLocation(dto.getLocation());
         match.setMatchType(dto.getType());
-        match.setGoalsFor(dto.getGoalsFor());
+        
+        // variaveis iniciais de placar
+        match.setGoalsFor(dto.getGoalsFor() != null ? dto.getGoalsFor() : 0);
         match.setGoalsAgainst(dto.getGoalsAgainst());
         match.setPenaltiesFor(dto.getPenaltiesFor());
         match.setPenaltiesAgainst(dto.getPenaltiesAgainst());
+        
+        // inicia os cartões zerados
+        match.setYellowCards(0);
+        match.setRedCards(0);
 
         // se tiver tecnico, busca o tecnico e associa
-        if (dto.getCoachId() != null) {
-            // se o ID do técnico foi informado no JSON, busca o técnico pelo ID
+        if (dto.getCoachId() != null) { 
             Coach coach = coachRepository.findById(dto.getCoachId())
                     .orElseThrow(() -> new RuntimeException("Técnico com ID " + dto.getCoachId() + " não encontrado."));
             match.setCoach(coach);
         } else if (season.getTeam().getCurrentCoach() != null) {
-            // se o ID do técnico não foi informado, associa o técnico atual do time da
-            // temporada
             match.setCoach(season.getTeam().getCurrentCoach());
         }
 
@@ -90,7 +93,6 @@ public class MatchService {
                 Player player = playerRepository.findById(item.getPlayerId())
                         .orElseThrow(() -> new RuntimeException("Jogador não encontrado ID: " + item.getPlayerId()));
 
-                // o jogador pertence ao time da temporada? se não, erro de integridade
                 if (!player.getTeam().getId().equals(seasonTeamId)) {
                     throw new RuntimeException("Erro de Integridade: O jogador " + player.getName() +
                             " pertence ao time " + player.getTeam().getName() +
@@ -104,10 +106,14 @@ public class MatchService {
 
                 match.getLineup().add(lineupEntity);
 
-                // Adiciona o ID na lista de "jogadores em campo/banco"
                 playersInMatchIds.add(player.getId());
             }
         }
+
+        // contagem automatica de gols e cartões a partir dos eventos
+        int calculatedGoals = 0;
+        int calculatedYellow = 0;
+        int calculatedRed = 0;
 
         // administra os eventos (Events)
         if (dto.getEvents() != null) {
@@ -116,8 +122,6 @@ public class MatchService {
                 Player player = null;
 
                 if (item.getPlayerId() != null) {
-                    // o jogador do evento deve estar no elenco da partida, caso contrário, erro de
-                    // integridade
                     if (!playersInMatchIds.contains(item.getPlayerId())) {
                         throw new RuntimeException("Erro de Integridade: O jogador ID " + item.getPlayerId() +
                                 " tentou registrar um evento (" + item.getType()
@@ -131,15 +135,37 @@ public class MatchService {
 
                 MatchEvent eventEntity = new MatchEvent();
                 eventEntity.setMatch(match);
-                eventEntity.setPlayer(player); // pode ser nulo para eventos sem jogador associado
+                eventEntity.setPlayer(player);
                 eventEntity.setEventType(item.getType());
 
                 match.getEvents().add(eventEntity);
+
+                // contabiliza automaticamente gols e cartões
+                String type = item.getType().toString().toUpperCase();
+                
+                if ("GOL".equals(type)) {
+                    calculatedGoals++;
+                } else if ("YELLOW_CARD".equals(type)) {
+                    calculatedYellow++;
+                } else if ("RED_CARD".equals(type)) {
+                    calculatedRed++;
+                }
             }
         }
+
+        // salva os cartões calculados
+        match.setYellowCards(calculatedYellow);
+        match.setRedCards(calculatedRed);
+
+        // se tiver gols calculados, sobrescreve o que veio no dto
+        if (calculatedGoals > 0) {
+            match.setGoalsFor(calculatedGoals);
+        }
+
         // salva a partida completa
         return matchRepository.save(match);
     }
+    
     // atualizar dados básicos da partida
     public Match updateMatch(Long matchId, MatchUpdateDTO dto) {
         // busca a partida
