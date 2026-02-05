@@ -33,7 +33,8 @@ public class TeamService {
         String emailLogado = getEmailLogado();
         
         // buscar usuário dono do time
-        User dono = (User) userRepository.findByEmail(emailLogado);
+        User dono = userRepository.findByEmail(emailLogado)
+                                  .orElseThrow(() -> new RuntimeException("Dono não encontrado no banco"));
         
         
         //seta o dono do time antes de salvar
