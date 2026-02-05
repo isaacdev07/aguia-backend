@@ -1,6 +1,6 @@
 package aguia.history.drakes.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import aguia.history.drakes.services.CustomOidcUserService; 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,45 +18,47 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    SecurityFilter securityFilter;
+    // injeção de dependências
+    private final CustomSuccessHandler customSuccessHandler;
+    private final SecurityFilter securityFilter;
+    private final CustomOidcUserService customOidcUserService; 
 
-    // adiciona as regras de segurança nas rotas
+    // construtor de injeção
+    public SecurityConfig(SecurityFilter securityFilter, 
+                          CustomOidcUserService customOidcUserService, 
+                          CustomSuccessHandler customSuccessHandler) {
+        this.securityFilter = securityFilter;
+        this.customOidcUserService = customOidcUserService;
+        this.customSuccessHandler = customSuccessHandler;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.disable()) 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(authorize -> authorize
-                        // rotas de autenticação liberadas
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        
-                        // swagger liberado
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                        // get nas partidas somente autenticado
-                        .requestMatchers(HttpMethod.GET, "/matches").authenticated() 
-                        // criar partidas somente autenticado
-                        .requestMatchers(HttpMethod.POST, "/matches/**").authenticated()
-
-                        //ainda vou adicionar regras específicas para outras rotas
-
-                        // todas as outras requisições precisam estar autenticadas
                         .anyRequest().authenticated()
                 )
-                // Adiciona o nosso filtro ANTES do filtro padrão do Spring
+                .oauth2Login(oauth2 -> oauth2
+                    .userInfoEndpoint(userInfo -> userInfo
+                       // configura o serviço customizado
+                        .oidcUserService(customOidcUserService) 
+                    )
+                    .successHandler(customSuccessHandler)
+                )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    // necessário para autenticação
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    // criptografia de senhas
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
