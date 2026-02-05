@@ -34,38 +34,30 @@ public class AuthenticationController {
     // login
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data){
-        // cria o objeto de autenticação do Spring Security
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        
-        // vai ao banco validar o usuário e senha
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        // deu certo, gera o token
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
-        // retorna o token
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     // cadastro
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data){
-        // verifica se o email existe no banco
-        if(this.repository.findByEmail(data.email()) != null) {
+    public ResponseEntity register(@RequestBody @Valid RegisterDTO data){
+        
+        // verifica se email já existe
+        if(this.repository.findByEmail(data.email()).isPresent()) {
             return ResponseEntity.badRequest().body("Este email já está em uso.");
         }
 
-        // critografa a senha
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         
-        // cria o usuário
+        // cria o usuario
         User newUser = new User(data.email(), encryptedPassword, data.role());
 
-        // salva no banco
         this.repository.save(newUser);
 
         return ResponseEntity.ok().build();
     }
 }
-    
-
