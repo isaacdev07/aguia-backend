@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import aguia.history.drakes.dtos.PlayerAssistDTO;
-import aguia.history.drakes.dtos.PlayerStatsDTO;
+import aguia.history.drakes.dtos.TopAssistDTO;
+import aguia.history.drakes.dtos.TopScorerDTO;
+import aguia.history.drakes.dtos.PlayerParticipationDTO;
 import aguia.history.drakes.dtos.TeamStatsDTO;
+import aguia.history.drakes.services.PlayerStatsService;
 import aguia.history.drakes.services.StatisticsService;
 // controlador para estatísticas
 @RestController
@@ -19,16 +21,19 @@ import aguia.history.drakes.services.StatisticsService;
 public class StatisticsController {
 
     @Autowired
+    private PlayerStatsService playerStatsService;
+
+    @Autowired
     private StatisticsService statisticsService;
     // obter os principais artilheiros de uma equipe
     @GetMapping("/top-scorers/{teamId}")
-    public ResponseEntity<List<PlayerStatsDTO>> getTopScorers(@PathVariable Long teamId) {
+    public ResponseEntity<List<TopScorerDTO>> getTopScorers(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTopScorers(teamId));
     }
 
     // obter os principais assistentes de uma equipe
     @GetMapping("/top-assisters/{teamId}")
-    public ResponseEntity<List<PlayerAssistDTO>> getTopAssisters(@PathVariable Long teamId) {
+    public ResponseEntity<List<TopAssistDTO>> getTopAssisters(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTopAssisters(teamId));
     }
 
@@ -37,4 +42,10 @@ public class StatisticsController {
     public ResponseEntity<TeamStatsDTO> getTeamSummary(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTeamStatistics(teamId));
     }
+
+    @GetMapping("/player-games/{playerId}")
+    public ResponseEntity<PlayerParticipationDTO> getPlayerParticipation(@PathVariable Long playerId) {
+        return ResponseEntity.ok(playerStatsService.getPlayerParticipationStats(playerId));
+    }
+
 }
