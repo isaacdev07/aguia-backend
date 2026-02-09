@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import aguia.history.drakes.domain.Match;
-import aguia.history.drakes.dtos.PlayerAssistDTO;
-import aguia.history.drakes.dtos.PlayerStatsDTO;
+import aguia.history.drakes.dtos.TopAssistDTO;
+import aguia.history.drakes.dtos.TopScorerDTO;
 import aguia.history.drakes.dtos.TeamStatsDTO;
 import aguia.history.drakes.repositories.MatchEventRepository;
 import aguia.history.drakes.repositories.MatchRepository;
@@ -22,7 +22,7 @@ public class StatisticsService {
     private MatchRepository matchRepository;
 
     // obter os principais artilheiros de uma equipe
-    public List<PlayerStatsDTO> getTopScorers(Long teamId) {
+    public List<TopScorerDTO> getTopScorers(Long teamId) {
         return matchEventRepository.findTopScorersByTeam(teamId);
     }
     // obter estatísticas gerais da equipe
@@ -69,7 +69,7 @@ public class StatisticsService {
     }
 
     // obter os principais assistentes de uma equipe
-    public List<PlayerAssistDTO> getTopAssisters(Long teamId) {
+    public List<TopAssistDTO> getTopAssisters(Long teamId) {
         return matchEventRepository.findTopAssistsByTeam(teamId);
     }   
 
