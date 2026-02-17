@@ -4,7 +4,10 @@ import aguia.history.drakes.domain.Player;
 import aguia.history.drakes.domain.enums.LineupStatus;
 import aguia.history.drakes.dtos.PlayerParticipationDTO;
 import aguia.history.drakes.repositories.MatchLineupRepository;
-import aguia.history.drakes.repositories.PlayerRepository; 
+import aguia.history.drakes.repositories.PlayerRepository;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,5 +45,9 @@ public class PlayerStatsService {
                 subsIn, 
                 benchOnly
         );
+    }
+        
+        public List<PlayerParticipationDTO> getStatsByTeam(Long teamId) {
+            return lineupRepository.getStatsByTeam(teamId);
     }
 }
