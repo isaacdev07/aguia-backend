@@ -48,4 +48,9 @@ public class StatisticsController {
         return ResponseEntity.ok(playerStatsService.getPlayerParticipationStats(playerId));
     }
 
+    @GetMapping("/team-participation/{teamId}")
+    public ResponseEntity<List<PlayerParticipationDTO>> getTeamParticipationList(@PathVariable Long teamId) {
+        return ResponseEntity.ok(playerStatsService.getStatsByTeam(teamId));
+    }
+
 }
