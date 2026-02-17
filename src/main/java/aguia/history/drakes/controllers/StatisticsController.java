@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import aguia.history.drakes.dtos.TopAssistDTO;
+import aguia.history.drakes.dtos.TopCleanSheetDTO;
 import aguia.history.drakes.dtos.TopScorerDTO;
 import aguia.history.drakes.dtos.PlayerParticipationDTO;
 import aguia.history.drakes.dtos.TeamStatsDTO;
@@ -42,15 +43,23 @@ public class StatisticsController {
     public ResponseEntity<TeamStatsDTO> getTeamSummary(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTeamStatistics(teamId));
     }
-
+    
+    // obter estatísticas de participação de um jogador
     @GetMapping("/player-games/{playerId}")
     public ResponseEntity<PlayerParticipationDTO> getPlayerParticipation(@PathVariable Long playerId) {
         return ResponseEntity.ok(playerStatsService.getPlayerParticipationStats(playerId));
     }
 
+    // obter estatísticas de participação de um time
     @GetMapping("/team-participation/{teamId}")
     public ResponseEntity<List<PlayerParticipationDTO>> getTeamParticipationList(@PathVariable Long teamId) {
         return ResponseEntity.ok(playerStatsService.getStatsByTeam(teamId));
+    }
+
+    // obter os goleiros com mais cleansheets (jogos sem sofrer gols) de uma equipe
+  @GetMapping("/top-cleansheets/{teamId}")
+    public ResponseEntity<List<TopCleanSheetDTO>> getTopCleanSheets(@PathVariable Long teamId) {
+        return ResponseEntity.ok(statisticsService.getTopCleanSheets(teamId));
     }
 
 }
