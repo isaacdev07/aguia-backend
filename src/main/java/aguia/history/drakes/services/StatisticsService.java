@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import aguia.history.drakes.domain.Match;
 import aguia.history.drakes.dtos.TopAssistDTO;
+import aguia.history.drakes.dtos.TopCleanSheetDTO;
 import aguia.history.drakes.dtos.TopScorerDTO;
 import aguia.history.drakes.dtos.TeamStatsDTO;
 import aguia.history.drakes.repositories.MatchEventRepository;
@@ -72,6 +73,11 @@ public class StatisticsService {
     public List<TopAssistDTO> getTopAssisters(Long teamId) {
         return matchEventRepository.findTopAssistsByTeam(teamId);
     }   
+
+    // obter os goleiros com mais cleansheets (jogos sem sofrer gols) de uma equipe
+    public List<TopCleanSheetDTO> getTopCleanSheets(Long teamId) {
+        return matchRepository.findTopCleanSheets(teamId);
+    }
 
 }
 
