@@ -10,6 +10,7 @@ public class DrakesApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DrakesApplication.class, args);
+		System.out.println("Drakes Application is running...");
 	}
-
+	
 }
