@@ -30,6 +30,9 @@ public class Team {
     @Column(nullable = false)
     private String name;  //nome do time
     private String city; //cidade do time
+    private Integer foundedYear; //ano de fundação do time
+    private String shieldUrl; //url do escudo do time (temporario)
+
     // relação com jogadores
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
