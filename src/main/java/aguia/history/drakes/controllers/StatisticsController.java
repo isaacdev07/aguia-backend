@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import aguia.history.drakes.dtos.TopAssistDTO;
+import aguia.history.drakes.dtos.TopCardDTO;
 import aguia.history.drakes.dtos.TopCleanSheetDTO;
 import aguia.history.drakes.dtos.TopScorerDTO;
 import aguia.history.drakes.dtos.PlayerParticipationDTO;
@@ -60,6 +61,12 @@ public class StatisticsController {
   @GetMapping("/top-cleansheets/{teamId}")
     public ResponseEntity<List<TopCleanSheetDTO>> getTopCleanSheets(@PathVariable Long teamId) {
         return ResponseEntity.ok(statisticsService.getTopCleanSheets(teamId));
+    }
+
+    // obter os jogadores com mais cartões de uma equipe
+    @GetMapping("/top-cards/{teamId}")
+    public ResponseEntity<List<TopCardDTO>> getTopCards(@PathVariable Long teamId) {
+        return ResponseEntity.ok(statisticsService.getTopCards(teamId));
     }
 
 }
