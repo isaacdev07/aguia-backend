@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import aguia.history.drakes.domain.Team;
 import aguia.history.drakes.dtos.TeamCreationDTO;
-import aguia.history.drakes.dtos.TeamDTO;
 import aguia.history.drakes.services.TeamService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
